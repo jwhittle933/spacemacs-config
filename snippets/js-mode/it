@@ -1,0 +1,7 @@
+#ReasonReact -*- mode: snippet -*-
+# name: it
+# key: it
+# --
+it('$1', () => {
+  $0
+})
