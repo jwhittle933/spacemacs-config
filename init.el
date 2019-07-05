@@ -42,7 +42,8 @@ This function should only modify configuration layer settings."
      javascript
      flow
      lsp
-     (go :variables go-backend 'lsp)
+     ;; (go :variables go-backend 'lsp)
+     go
      treemacs
      ;; (treemacs :variables
      ;;           treemacs-use-follow-mode t)
@@ -554,18 +555,35 @@ explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
 
-  (use-package lsp-mode
-    :commands (lsp lsp-deferred))
+  ;; (use-package lsp-mode
+  ;;   :config
+  ;;   (add-hook 'go-mode-hook #'lsp)
+  ;;   (setq lsp-prefer-flymake nil)
+  ;;   :commands (lsp lsp-deferred))
 
-  (add-hook 'go-mode-hook #'lsp-deferred)
+  ;; (add-hook 'go-mode-hook #'lsp-deferred)
 
   ;; optional - provides fancier overlays
-  (use-package lsp-ui
-    :commands lsp-ui-mode)
+  ;; (use-package lsp-ui
+  ;;   :requires lsp-mode flycheck
+  ;;   :after (lsp)
+  ;;   :commands lsp-ui-mode
+  ;;   :config
+  ;;   (setq lsp-ui-doc-enable t
+  ;;         lsp-ui-doc-use-childframe t
+  ;;         lsp-ui-doc-position 'top
+  ;;         lsp-ui-doc-include-signature t
+  ;;         lsp-ui-sideline-enable nil
+  ;;         lsp-ui-flycheck-enable t
+  ;;         lsp-ui-flycheck-live-reporting t
+  ;;         lsp-ui-peek-enable t
+  ;;         lsp-ui-peek-list-width 60
+  ;;         lsp-ui-peek-peek-height 25)
+  ;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 
   ;; if you use company-mode for completion (otherwise, complete-at-point works out of the box):
-  (use-package company-lsp
-    :commands company-lsp)
+  ;; (use-package company-lsp
+  ;;   :commands company-lsp)
 
   (add-to-list 'load-path (expand-file-name "lisp" dotspacemacs-directory))
   (let ((default-directory (expand-file-name "packages" dotspacemacs-directory)))
