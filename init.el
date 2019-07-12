@@ -42,6 +42,9 @@ This function should only modify configuration layer settings."
      javascript
      flow
      lsp
+     common-lisp
+     emacs-lisp
+     fsharp
      ;; (go :variables go-backend 'lsp)
      go
      treemacs
@@ -76,7 +79,6 @@ This function should only modify configuration layer settings."
      elixir
      erlang
      semantic
-     javascript
      react
      prettier
      )
@@ -203,7 +205,7 @@ It should only modify the values of Spacemacs settings."
    ;; directory. A string value must be a path to an image format supported
    ;; by your Emacs build.
    ;; If the value is nil then no banner is displayed. (default 'official)
-   dotspacemacs-startup-banner 'official
+   dotspacemacs-startup-banner 'random
 
    ;; List of items to show in startup buffer or an association list of
    ;; the form `(list-type . list-size)`. If nil then it is disabled.
@@ -458,7 +460,7 @@ It should only modify the values of Spacemacs settings."
    ;; `trailing' to delete only the whitespace at end of lines, `changed' to
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
-   dotspacemacs-whitespace-cleanup 'changed
+   dotspacemacs-whitespace-cleanup nil
    ;; Either nil or a number of seconds. If non-nil zone out after the specified
    ;; number of seconds. (default nil)
    dotspacemacs-zone-out-when-idle nil
@@ -554,12 +556,83 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+  (add-hook 'elixir-mode-hook
+            (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
 
   ;; (use-package lsp-mode
   ;;   :config
   ;;   (add-hook 'go-mode-hook #'lsp)
   ;;   (setq lsp-prefer-flymake nil)
   ;;   :commands (lsp lsp-deferred))
+
+  ;; (load-file "~/.spacemacs.d/layers/centaur.el")
+  ;; (centaur-tabs-headline-match)
+  ;; (setq centaur-tabs-style "chamfer")
+  ;; (setq centaur-tabs-set-icons t)
+  ;; (setq centaur-tabs-close-button "X")
+  ;; (setq centaur-tabs-set-modified-marker t)
+
+  (use-package centaur-tabs
+   :load-path "~/.spacemacs.d/layers/centaur-tabs"
+   :config
+   (setq centaur-tabs-style "bar")
+   (setq centaur-tabs-height 32)
+   (setq centaur-tabs-set-icons t)
+   (setq centaur-tabs-set-bar 'over)
+   (setq centaur-tabs-set-modified-marker t)
+   (centaur-tabs-headline-match)
+   (centaur-tabs-mode t)
+   (defun centaur-tabs-buffer-groups ()
+     "`centaur-tabs-buffer-groups' control buffers' group rules.
+
+ Group centaur-tabs with mode if buffer is derived from `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
+ All buffer name start with * will group to \"Emacs\".
+ Other buffer group by `centaur-tabs-get-group-name' with project name."
+     (list
+      (cond
+	((or (string-equal "*" (substring (buffer-name) 0 1))
+	     (memq major-mode '(magit-process-mode
+				magit-status-mode
+				magit-diff-mode
+				magit-log-mode
+				magit-file-mode
+				magit-blob-mode
+				magit-blame-mode
+				)))
+	 "Emacs")
+	((derived-mode-p 'prog-mode)
+	 "Editing")
+	((derived-mode-p 'dired-mode)
+	 "Dired")
+	((memq major-mode '(helpful-mode
+			    help-mode))
+	 "Help")
+	((memq major-mode '(org-mode
+			    org-agenda-clockreport-mode
+			    org-src-mode
+			    org-agenda-mode
+			    org-beamer-mode
+			    org-indent-mode
+			    org-bullets-mode
+			    org-cdlatex-mode
+			    org-agenda-log-mode
+			    diary-mode))
+	 "OrgMode")
+	(t
+	 (centaur-tabs-get-group-name (current-buffer))))))
+   :hook
+   (dashboard-mode . centaur-tabs-local-mode)
+   (term-mode . centaur-tabs-local-mode)
+   (calendar-mode . centaur-tabs-local-mode)
+   (org-agenda-mode . centaur-tabs-local-mode)
+   (helpful-mode . centaur-tabs-local-mode)
+   :bind
+   ("C-<prior>" . centaur-tabs-backward)
+   ("C-<next>" . centaur-tabs-forward)
+   ("C-c t" . centaur-tabs-counsel-switch-group)
+   (:map evil-normal-state-map
+	  ("g t" . centaur-tabs-forward)
+	  ("g T" . centaur-tabs-backward)))
 
   ;; (add-hook 'go-mode-hook #'lsp-deferred)
 
@@ -632,29 +705,29 @@ you should place your code here."
   (key-chord-define-global "JK" 'evil-normal-state)
 
   (windmove-default-keybindings 'super)
-  (progn
-    ;; automatically save buffers associated with files on buffer switch
-    ;; and on windows switch
-    (defadvice switch-to-buffer (before save-buffer-now activate)
-      (when buffer-file-name (save-buffer)))
-    (defadvice other-window (before other-window-now activate)
-      (when buffer-file-name (save-buffer)))
-    (defadvice windmove-up (before other-window-now activate)
-      (when buffer-file-name (save-buffer)))
-    (defadvice windmove-down (before other-window-now activate)
-      (when buffer-file-name (save-buffer)))
-    (defadvice windmove-left (before other-window-now activate)
-      (when buffer-file-name (save-buffer)))
-    (defadvice windmove-right (before other-window-now activate)
-      (when buffer-file-name (save-buffer)))
-    )
+  ;; (progn
+  ;;   ;; automatically save buffers associated with files on buffer switch
+  ;;   ;; and on windows switch
+  ;;   (defadvice switch-to-buffer (before save-buffer-now activate)
+  ;;     (when buffer-file-name (save-buffer)))
+  ;;   (defadvice other-window (before other-window-now activate)
+  ;;     (when buffer-file-name (save-buffer)))
+  ;;   (defadvice windmove-up (before other-window-now activate)
+  ;;     (when buffer-file-name (save-buffer)))
+  ;;   (defadvice windmove-down (before other-window-now activate)
+  ;;     (when buffer-file-name (save-buffer)))
+  ;;   (defadvice windmove-left (before other-window-now activate)
+  ;;     (when buffer-file-name (save-buffer)))
+  ;;   (defadvice windmove-right (before other-window-now activate)
+  ;;     (when buffer-file-name (save-buffer)))
+  ;;  )
   ;; (advice-add 'select-window :after save-buffer)
   ;; (advice-add 'save-buffer :after #'select-buffer)
   ;; (advice-add (when buffer-file-name 'save-buffer) :after #'select-buffer)
   ;; (advice-add 'select-buffer :after #'his-tracing-function)
 
-  (defadvice select-window (before other-window activate)
-    (when buffer-file-name (save-buffer)))
+  ;; (defadvice select-window (before other-window activate)
+  ;;   (when buffer-file-name (save-buffer)))
 
   (global-set-key (kbd "M-{") 'insert-pair)
   (global-set-key (kbd "M-[") 'insert-pair)
