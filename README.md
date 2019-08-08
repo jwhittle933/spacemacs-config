@@ -1,1 +1,1 @@
-## .spacemacs config
+## .spacemacs.d/ 
