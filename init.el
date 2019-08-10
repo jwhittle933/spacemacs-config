@@ -33,7 +33,9 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(typescript
+   '(
+     php
+     typescript
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
@@ -107,6 +109,7 @@ This function should only modify configuration layer settings."
      ;; xclip
      company-flow
      key-chord
+     vue-mode
      )
 
    ;; A list of packages that cannot be updated.
@@ -885,7 +888,6 @@ you should place your code here."
   (setq avy-timeout-seconds 0.2)
 
   (spacemacs/set-leader-keys "fel" 'counsel-find-library)
-
 
   ;; ;; Profiler bindings
   ;; (defun profiler-start-cpu ()
