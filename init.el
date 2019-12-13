@@ -35,7 +35,6 @@ This function should only modify configuration layer settings."
    dotspacemacs-configuration-layers
    '(haskell
      kotlin
-     php
      typescript
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
@@ -43,16 +42,16 @@ This function should only modify configuration layer settings."
      ;; `M-m f e R' (Emacs style) to install them.
      ;; ----------------------------------------------------------------
      spotify
+     games
      twitter
      javascript
-     typescript
      flow
-     lsp
      common-lisp
      emacs-lisp
+     racket
      fsharp
-     ;; (go :variables go-backend 'lsp)
      go
+     c-c++
      treemacs
      ;; (treemacs :variables
      ;;           treemacs-use-follow-mode t)
@@ -70,7 +69,7 @@ This function should only modify configuration layer settings."
             shell-default-position 'bottom)
      ;; spell-checking
      syntax-checking
-     nginx
+     ;; nginx
      csv
      python
      json
@@ -237,8 +236,14 @@ It should only modify the values of Spacemacs settings."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(sanityinc-solarized-dark
-                         sanityinc-tomorrow-blue)
+   dotspacemacs-themes '(subatomic
+                         deeper-blue
+                         underwater
+                         material
+                         white-sand
+                         twilight-bright
+                         ritchie
+                         professional)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
    ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
@@ -567,6 +572,13 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+  ;; Racket Support
+  (require 'racket-mode)
+  (setq racket-racket-program "/Applications/Racket v7.2/bin/drracket")
+  (setq racket-raco-program "/Applications/Racket v7.2/bin/raco")
+  ;; Clang support
+  (setq-default dotspacemacs-configuration-layers
+                '((c-c++ :variables c-c++-enable-clang-support t)))
 
   ;; (add hook 'js2-mode-hook 'prettier-js-mode)
   ;; (add-hook 'web-mode-hook 'prettier-js-mode)
