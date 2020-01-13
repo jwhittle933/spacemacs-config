@@ -50,11 +50,12 @@ This function should only modify configuration layer settings."
      emacs-lisp
      racket
      fsharp
-     go
+     (go :variables
+         go-backend 'go-mode
+         go-format-before-save t
+         godoc-at-point-function 'godoc-gogetdoc)
      c-c++
      treemacs
-     ;; (treemacs :variables
-     ;;           treemacs-use-follow-mode t)
      auto-completion
      ;; better-defaults
      emacs-lisp
@@ -86,6 +87,7 @@ This function should only modify configuration layer settings."
      erlang
      semantic
      react
+     (vue :variables vue-backend 'lsp)
      prettier
      )
 
@@ -109,7 +111,6 @@ This function should only modify configuration layer settings."
      ;; xclip
      company-flow
      key-chord
-     vue-mode
      )
 
    ;; A list of packages that cannot be updated.
@@ -580,82 +581,12 @@ you should place your code here."
   (setq-default dotspacemacs-configuration-layers
                 '((c-c++ :variables c-c++-enable-clang-support t)))
 
-  ;; (add hook 'js2-mode-hook 'prettier-js-mode)
-  ;; (add-hook 'web-mode-hook 'prettier-js-mode)
-  ;; (use-package lsp-mode
-  ;;   :config
-  ;;   (add-hook 'go-mode-hook #'lsp)
-  ;;   (setq lsp-prefer-flymake nil)
-  ;;   :commands (lsp lsp-deferred))
-
-  ;; (load-file "~/.spacemacs.d/layers/centaur.el")
-  ;; (centaur-tabs-headline-match)
-  ;; (setq centaur-tabs-style "chamfer")
-  ;; (setq centaur-tabs-set-icons t)
-  ;; (setq centaur-tabs-close-button "X")
-  ;; (setq centaur-tabs-set-modified-marker t)
-
-  (use-package centaur-tabs
-   :load-path "~/.spacemacs.d/layers/centaur-tabs"
-   :config
-   (setq centaur-tabs-style "bar")
-   (setq centaur-tabs-height 32)
-   (setq centaur-tabs-set-icons t)
-   (setq centaur-tabs-set-bar 'over)
-   (setq centaur-tabs-set-modified-marker t)
-   (centaur-tabs-headline-match)
-   (centaur-tabs-mode t)
-   (defun centaur-tabs-buffer-groups ()
-     "`centaur-tabs-buffer-groups' control buffers' group rules.
-
- Group centaur-tabs with mode if buffer is derived from `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
- All buffer name start with * will group to \"Emacs\".
- Other buffer group by `centaur-tabs-get-group-name' with project name."
-     (list
-      (cond
-	((or (string-equal "*" (substring (buffer-name) 0 1))
-	     (memq major-mode '(magit-process-mode
-				magit-status-mode
-				magit-diff-mode
-				magit-log-mode
-				magit-file-mode
-				magit-blob-mode
-				magit-blame-mode
-				)))
-	 "Emacs")
-	((derived-mode-p 'prog-mode)
-	 "Editing")
-	((derived-mode-p 'dired-mode)
-	 "Dired")
-	((memq major-mode '(helpful-mode
-			    help-mode))
-	 "Help")
-	((memq major-mode '(org-mode
-			    org-agenda-clockreport-mode
-			    org-src-mode
-			    org-agenda-mode
-			    org-beamer-mode
-			    org-indent-mode
-			    org-bullets-mode
-			    org-cdlatex-mode
-			    org-agenda-log-mode
-			    diary-mode))
-	 "OrgMode")
-	(t
-	 (centaur-tabs-get-group-name (current-buffer))))))
-   :hook
-   (dashboard-mode . centaur-tabs-local-mode)
-   (term-mode . centaur-tabs-local-mode)
-   (calendar-mode . centaur-tabs-local-mode)
-   (org-agenda-mode . centaur-tabs-local-mode)
-   (helpful-mode . centaur-tabs-local-mode)
-   :bind
-   ("C-<prior>" . centaur-tabs-backward)
-   ("C-<next>" . centaur-tabs-forward)
-   ("C-c t" . centaur-tabs-counsel-switch-group)
-   (:map evil-normal-state-map
-	  ("g t" . centaur-tabs-forward)
-	  ("g T" . centaur-tabs-backward)))
+  (setq-default
+   ;; web mode
+   web-mode-markup-indent-offset 2
+   web-mode-css-indent-offset 2
+   web-mode-code-indent-offset 2
+   web-mode-attr-indent-offset 2)
 
   ;; (add-hook 'go-mode-hook #'lsp-deferred)
 
@@ -896,7 +827,6 @@ you should place your code here."
    ;; Enable midnight-mode to clean old buffers every day
    midnight-mode t)
 
-
   ;; Key Bindings
   (global-set-key (kbd "M-]") 'sp-slurp-hybrid-sexp)
   (global-set-key (kbd "C-x C-l") 'evil-complete-next-line)
@@ -1042,11 +972,11 @@ This function is called at the very end of Spacemacs initialization."
    (quote
     ("#00FF99" "#CCFF99" "#FFCC99" "#FF9999" "#FF99CC" "#CC99FF" "#9999FF" "#99CCFF" "#99FFCC" "#7FFF00")))
  '(hl-paren-colors (quote ("#326B6B")))
- '(js-indent-level 2)
+ '(js-indent-level 2 t)
  '(org-src-block-faces (quote (("emacs-lisp" (:background "#F0FFF0")))))
  '(package-selected-packages
    (quote
-    (lsp-haskell intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell dante lcr company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode tide typescript-mode import-js grizzl lsp-go helm-gtags godoctor go-tag go-rename go-impl go-guru go-gen-test go-fill-struct go-eldoc ggtags flycheck-gometalinter flycheck-golangci-lint counsel-gtags company-go go-mode flow-js2-mode yasnippet-snippets helm-company helm-c-yasnippet fuzzy company-web web-completion-data company-statistics company-flow company-emoji company-anaconda auto-yasnippet ac-ispell auto-complete yapfify yaml-mode xclip ws-butler writeroom-mode winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen utop use-package tuareg treemacs-projectile treemacs-evil toc-org tagedit symon symbol-overlay string-inflection spaceline-all-the-icons smeargle slim-mode shift-number seti-theme scss-mode sass-mode rjsx-mode reveal-in-osx-finder restart-emacs reason-mode rainbow-mode rainbow-identifiers rainbow-delimiters pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer osx-trash osx-dictionary osx-clipboard org-gcal org-bullets open-junk-file ocp-indent ob-elixir nginx-mode naquadah-theme nameless move-text monokai-theme magit-svn magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint launchctl json-navigator js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helpful helm-xref helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-ag gruvbox-theme graphviz-dot-mode google-translate golden-ratio gitignore-templates github-search github-clone gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gist forge font-lock+ flycheck-pos-tip flycheck-package flycheck-ocaml flycheck-mix flycheck-flow flycheck-credo flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-terminal-cursor-changer evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu eval-sexp-fu erlang emojify emoji-cheat-sheet-plus emmet-mode elisp-slime-nav editorconfig dune dumb-jump dtrt-indent dotenv-mode doom-themes doom-modeline dockerfile-mode docker dired-collapse diminish diff-hl dakrone-theme cython-mode csv-mode counsel-projectile company-flx column-enforce-mode color-identifiers-mode clean-aindent-mode centered-cursor-mode browse-at-remote blacken auto-highlight-symbol auto-compile atom-one-dark-theme anaconda-mode alchemist aggressive-indent add-node-modules-path ace-link ace-jump-helm-line)))
+    (lsp-ui lsp-treemacs lsp-python-ms helm-lsp dap-mode bui tree-mode cquery company-lsp ccls lsp-haskell intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell dante lcr company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode tide typescript-mode import-js grizzl lsp-go helm-gtags godoctor go-tag go-rename go-impl go-guru go-gen-test go-fill-struct go-eldoc ggtags flycheck-gometalinter flycheck-golangci-lint counsel-gtags company-go go-mode flow-js2-mode yasnippet-snippets helm-company helm-c-yasnippet fuzzy company-web web-completion-data company-statistics company-flow company-emoji company-anaconda auto-yasnippet ac-ispell auto-complete yapfify yaml-mode xclip ws-butler writeroom-mode winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen utop use-package tuareg treemacs-projectile treemacs-evil toc-org tagedit symon symbol-overlay string-inflection spaceline-all-the-icons smeargle slim-mode shift-number seti-theme scss-mode sass-mode rjsx-mode reveal-in-osx-finder restart-emacs reason-mode rainbow-mode rainbow-identifiers rainbow-delimiters pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer osx-trash osx-dictionary osx-clipboard org-gcal org-bullets open-junk-file ocp-indent ob-elixir nginx-mode naquadah-theme nameless move-text monokai-theme magit-svn magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint launchctl json-navigator js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helpful helm-xref helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-ag gruvbox-theme graphviz-dot-mode google-translate golden-ratio gitignore-templates github-search github-clone gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gist forge font-lock+ flycheck-pos-tip flycheck-package flycheck-ocaml flycheck-mix flycheck-flow flycheck-credo flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-terminal-cursor-changer evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu eval-sexp-fu erlang emojify emoji-cheat-sheet-plus emmet-mode elisp-slime-nav editorconfig dune dumb-jump dtrt-indent dotenv-mode doom-themes doom-modeline dockerfile-mode docker dired-collapse diminish diff-hl dakrone-theme cython-mode csv-mode counsel-projectile company-flx column-enforce-mode color-identifiers-mode clean-aindent-mode centered-cursor-mode browse-at-remote blacken auto-highlight-symbol auto-compile atom-one-dark-theme anaconda-mode alchemist aggressive-indent add-node-modules-path ace-link ace-jump-helm-line)))
  '(tetris-x-colors
    [[229 192 123]
     [97 175 239]
