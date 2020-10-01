@@ -1,8 +1,9 @@
+;; package --- Summary
 ;; -*- mode: emacs-lisp; lexical-binding: t -*-
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
-
 (defun dotspacemacs/layers ()
+  ;;; Code:
   "Layer configuration:
 This function should only modify configuration layer settings."
   (setq-default
@@ -33,7 +34,13 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(haskell
+   '(sql
+     (lsp :variables
+          lsp-navigation 'simple
+          lsp-ui-doc-enable nil
+          lsp-clients-go-gocode-completion-enabled nil
+          lsp-clients-go-server 'gopls)
+     haskell
      kotlin
      typescript
      ;; ----------------------------------------------------------------
@@ -51,15 +58,16 @@ This function should only modify configuration layer settings."
      racket
      fsharp
      (go :variables
-         go-backend 'go-mode
          go-format-before-save t
          godoc-at-point-function 'godoc-gogetdoc)
-     c-c++
+     (c-c++ :variables
+            c-c++-enable-clang-support t)
      treemacs
      auto-completion
      ;; better-defaults
-     emacs-lisp
-     rust
+     (rust :variables
+           rust-backend 'lsp
+           rust-format-on-save t)
      helm
      markdown
      multiple-cursors
@@ -72,24 +80,29 @@ This function should only modify configuration layer settings."
      syntax-checking
      ;; nginx
      csv
-     python
+     (python :variables
+             python-backend 'lsp
+             python-formatter 'yapf
+             python-format-on-save t
+             python-sort-imports-on-save t
+             python-pipenv-activate t)
      json
+     protobuf
      emoji
      git
      html
-     ocaml
      colors
      osx
      github
      yaml
      docker
-     elixir
+     (elixir :variables elixir-backend 'alchemist)
      erlang
      semantic
      react
      (vue :variables vue-backend 'lsp)
-     prettier
-     )
+     (node :variable node-add-modules-path)
+     prettier)
 
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -127,6 +140,7 @@ This function should only modify configuration layer settings."
    ;; installs *all* packages supported by Spacemacs and never uninstalls them.
    ;; (default is `used-only')
    dotspacemacs-install-packages 'used-only))
+
 
 (defun dotspacemacs/init ()
   "Initialization:
@@ -237,14 +251,18 @@ It should only modify the values of Spacemacs settings."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(subatomic
+   dotspacemacs-themes '(planet
+                         rebecca
+                         brin
+                         subatomic
                          deeper-blue
                          underwater
                          material
-                         white-sand
-                         twilight-bright
-                         ritchie
-                         professional)
+                         junio
+                         lush
+                         kaolin-mono-dark
+                         gotham
+                         doom-dracula)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
    ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
@@ -253,7 +271,7 @@ It should only modify the values of Spacemacs settings."
    ;; refer to the DOCUMENTATION.org for more info on how to create your own
    ;; spaceline theme. Value can be a symbol or list with additional properties.
    ;; (default '(spacemacs :separator wave :separator-scale 1.5))
-   dotspacemacs-mode-line-theme '(doom)
+   dotspacemacs-mode-line-theme '(all-the-icons)
 
    ;; If non-nil the cursor color matches the state color in GUI Emacs.
    ;; (default t)
@@ -263,11 +281,10 @@ It should only modify the values of Spacemacs settings."
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    ;; dotspacemacs-default-font '("SF Mono for Powerline"
    ;; dotspacemacs-default-font '("Source Code Pro"
-   dotspacemacs-default-font '("Anonymous Pro for Powerline"
-                               :size 18
+   dotspacemacs-default-font '("Source Code Pro for Powerline"
+                               :size 17
                                :weight normal
-                               :width normal
-                               :powerline-scale 1.1)
+                               :width normal)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
 
@@ -463,7 +480,7 @@ It should only modify the values of Spacemacs settings."
    ;; %z - mnemonics of buffer, terminal, and keyboard coding systems
    ;; %Z - like %z, but including the end-of-line format
    ;; (default "%I@%S")
-   dotspacemacs-frame-title-format "%m :: %f"
+   dotspacemacs-frame-title-format "%a :: %m :: %f"
 
    ;; Format specification for setting the icon title format
    ;; (default nil - same as frame-title-format)
@@ -498,9 +515,7 @@ This function is called immediately after `dotspacemacs/init', before layer
 configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
-
-
-  (setq node-add-modules-path t)
+  (setq powerline-default-separator 'arrow-fade)
 
   ;; Fix powerline separator colors on mac
   (setq powerline-image-apple-rgb t)
@@ -573,20 +588,25 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
-  ;; Racket Support
+  (require 'all-the-icons)
+  (insert (all-the-icons-icon-for-file "main.go"))
   (require 'racket-mode)
+  (define-key evil-normal-state-map (kbd "SPC o") 'flycheck-mode)
+  ;; Racket Support
   (setq racket-racket-program "/Applications/Racket v7.2/bin/drracket")
   (setq racket-raco-program "/Applications/Racket v7.2/bin/raco")
   ;; Clang support
-  (setq-default dotspacemacs-configuration-layers
-                '((c-c++ :variables c-c++-enable-clang-support t)))
-
   (setq-default
    ;; web mode
+   css-indent-offset 2
    web-mode-markup-indent-offset 2
    web-mode-css-indent-offset 2
    web-mode-code-indent-offset 2
    web-mode-attr-indent-offset 2)
+
+  (add-hook 'vue-mode-hook
+            (lambda()
+              (add-hook 'before-save-hook #'prettier-js nil t)))
 
   ;; (add-hook 'go-mode-hook #'lsp-deferred)
 
@@ -713,28 +733,6 @@ you should place your code here."
        an error"
     (car (ignore-errors (apply 'process-lines (split-string cmd)))))
 
-  ;; (require 'company-simple-complete)
-  ;; (require 'fill-or-unfill)
-  ;; (require 'quiet-emacs)
-
-  ;; (use-package helpful
-  ;;   :defer t
-  ;;   :commands
-  ;;   (helpful-function helpful-command helpful-macro))
-
-
-  ;; Prefer dumb-jump over evil to definition
-  ;; (setq spacemacs-default-jump-handlers (delete 'dumb-jump-go spacemacs-default-jump-handlers))
-  ;; (push 'dumb-jump-go spacemacs-default-jump-handlers)
-  ;; (setq dumb-jump-prefer-searcher 'rg)
-
-  ;; Create a buffer-local hook to run elixir-format on save, only when we enable elixir-mode.
-  ;; (add-hook 'elixir-mode-hook
-  ;;           (lambda () (add-hook 'before-save-hook 'elixir-format nil nil)))
-  (eval-after-load 'flycheck
-    '(flycheck-credo-setup))
-  (add-hook 'elixir-mode-hook 'flycheck-mode)
-
   ;; Indentation
   (setq
    sh-basic-offset 2
@@ -747,73 +745,12 @@ you should place your code here."
   (setq rjsx-mode-indent-level 2)
   ;; (spacemacs/enable-flycheck 'sh-mode)
 
-  ;; Prevent persp from loading existing perspectives when opening new frames.
-  ;; This fixes a flash of another buffer when opening things from the terminal.
-  ;; https://github.com/Bad-ptr/persp-mode.el/issues/64
-  ;; https://github.com/Bad-ptr/persp-mode.el/issues/36
-  ;; (setq persp-emacsclient-init-frame-behaviour-override nil)
-  ;; Don't care if I kill a buffer from a foreign persp
-  ;; (setq persp-kill-foreign-buffer-behaviour nil)
-  ;; (setq dtrt-indent-max-merge-deviation 9.0)
-
-  ;; ivy
-  ;; Use fuzzy finder
-  ;; (setq ivy-re-builders-alist
-  ;;       '((message-tab . ivy--regex-ignore-order)
-  ;;         (swiper . ivy--regex-plus)
-  ;;         (t . ivy--regex-fuzzy)))
-  ;; Do not insert ^
-  ;; (setq ivy-initial-inputs-alist nil)
-  ;; (add-to-list 'ivy-sort-functions-alist '(message-tab))
-
-  ;; Add `M-o v' and `M-o s' to open projectile files and buffers in splits
-  ;; from ivy
-  ;; (with-eval-after-load 'counsel-projectile
-  ;;   (ivy-set-actions
-  ;;    'counsel-projectile-find-file
-  ;;    '(("v" aj/projectile-find-file-vsplit "in vertical split")
-  ;;      ("s" aj/projectile-find-file-split "in horizontal split")
-  ;;      ("d" aj/projectile-delete-file-confirm "delete file"))))
-  ;; (ivy-set-actions
-  ;;  'ivy-switch-buffer
-  ;;  '(("v" aj/pop-to-buffer-vsplit "in vertical split")
-  ;;    ("s" aj/pop-to-buffer-split "in horizontal split")))
-  ;; ;; Add i and w to ivy actions to insert/copy the selection
-  ;; (ivy-set-actions
-  ;;  t
-  ;;  '(("i" aj/ivy-insert "insert")
-  ;;    ("w" aj/ivy-kill-new "copy")))
-  ;; (ivy-set-actions
-  ;;  'spacemacs/counsel-search
-  ;;  spacemacs--ivy-grep-actions)
-
-  ;; (defun aj/projectile-find-file-split (file)
-  ;;   (spacemacs/find-file-split (expand-file-name file (projectile-project-root))))
-  ;; (defun aj/projectile-find-file-vsplit (file)
-  ;;   (spacemacs/find-file-vsplit (expand-file-name file (projectile-project-root))))
-  ;; (defun aj/projectile-delete-file-confirm (file)
-  ;;   (spacemacs/delete-file-confirm (expand-file-name file (projectile-project-root))))
-  ;; (defun aj/pop-to-buffer-vsplit (buffer)
-  ;;   (pop-to-buffer buffer '(spacemacs//display-in-split (split-side . right))))
-  ;; (defun aj/pop-to-buffer-split (buffer)
-  ;;   (pop-to-buffer buffer '(spacemacs//display-in-split (split-side . below))))
-  ;; (defun aj/ivy-insert (x)
-  ;;   (insert
-  ;;    (if (stringp x)
-  ;;        x
-  ;;      (car x))))
-  ;; (defun aj/ivy-kill-new (x)
-  ;;   (kill-new
-  ;;    (if (stringp x)
-  ;;        x
-  ;;      (car x))))
-
   (setq
    ;; Use bash because it's faster
    shell-file-name "/bin/bash"
 
    ;; Spaceline
-   ;; spaceline-minor-modes-p nil
+   spaceline-minor-modes-p nil
 
    ;; File name completion
    read-file-name-completion-ignore-case t
@@ -836,91 +773,6 @@ you should place your code here."
 
   (spacemacs/set-leader-keys "fel" 'counsel-find-library)
 
-  ;; ;; Profiler bindings
-  ;; (defun profiler-start-cpu ()
-  ;;   (interactive)
-  ;;   (profiler-start 'cpu))
-  ;; (spacemacs/set-leader-keys "ops" 'profiler-start-cpu)
-  ;; (spacemacs/set-leader-keys "opr" 'profiler-report)
-  ;; (spacemacs/set-leader-keys "opt" 'profiler-stop)
-  ;; (spacemacs/set-leader-keys "opx" 'profiler-reset)
-  ;; (spacemacs/set-leader-keys "oper" 'elp-results)
-
-  ;; Bury buffers instead of killing them by default
-  ;; (spacemacs/set-leader-keys "bd" 'bury-buffer)
-  ;; (spacemacs/set-leader-keys "bk" 'spacemacs/kill-this-buffer)
-  ;; (spacemacs/set-leader-keys "bK" 'spacemacs/kill-other-buffers)
-
-  ;; Use C-j in place of C-x
-  ;; (define-key key-translation-map "\C-j" "\C-x")
-
-  ;; Word wrap in text buffers
-  ;; (add-hook 'text-mode-hook 'auto-fill-mode)
-
-  ;; Don't copy text to system clipboard while selecting it
-  ;; (fset 'evil-visual-update-x-selection 'ignore)
-
-  ;; Remap paste to be able to paste multiple times
-  ;; If I don't like this, maybe I'll try this:
-  ;; https://github.com/Dewdrops/evil-ReplaceWithRegister/
-  ;; (defun evil-paste-after-from-0 ()
-  ;;   (interactive)
-  ;;   (let ((evil-this-register ?0))
-  ;;     (call-interactively 'evil-paste-after)))
-
-  ;; (define-key evil-visual-state-map "p" 'evil-paste-after-from-0)
-
-  ;; (dotimes (n 6)
-  ;;   (let ((n (+ n 2)))
-  ;;     ;; Map s-<number> to switch layouts
-  ;;     (global-set-key (kbd (format "s-%d" n)) (intern (format "spacemacs/persp-switch-to-%d" n)))
-  ;;     ;; Map M-<number> to workspace switching
-  ;;     (let ((key (kbd (format "M-%d" n))))
-  ;;       (define-key winum-keymap key nil)
-  ;;       (global-unset-key key)
-  ;;       (global-set-key key (intern (format "eyebrowse-switch-to-window-config-%d" n))))))
-  ;; (global-set-key (kbd "s-1") 'aj/persp-org-agenda)
-  ;; (global-set-key (kbd "s-8") 'spacemacs/custom-layouts-transient-state/spacemacs/custom-perspective-@Org-and-exit)
-  ;; (global-set-key (kbd "s-9") 'spacemacs/custom-layouts-transient-state/spacemacs/custom-perspective-@Spacemacs-and-exit)
-
-  ;; ;; Prevent font size changes from resizing frame
-  ;; (setq frame-inhibit-implied-resize t)
-  ;; ;; Change entire frame font size
-  ;; (defun my-alter-frame-font-size (fn)
-  ;;   (let* ((current-font-name (frame-parameter nil 'font))
-  ;;          (decomposed-font-name (x-decompose-font-name current-font-name))
-  ;;          (font-size (string-to-number (aref decomposed-font-name 5))))
-  ;;     (aset decomposed-font-name 5 (int-to-string (funcall fn font-size)))
-  ;;     (set-frame-font (x-compose-font-name decomposed-font-name))))
-
-  ;; (defun my-inc-frame-font-size ()
-  ;;   (interactive)
-  ;;   (my-alter-frame-font-size '1+))
-
-  ;; (defun my-dec-frame-font-size ()
-  ;;   (interactive)
-  ;;   (my-alter-frame-font-size '1-))
-
-  ;; (global-set-key (kbd "s-+") 'my-inc-frame-font-size)
-  ;; (global-set-key (kbd "s-=") 'my-inc-frame-font-size)
-  ;; (global-set-key (kbd "s--") 'my-dec-frame-font-size)
-  ;; (global-set-key (kbd "C-+") 'spacemacs/scale-up-font)
-  ;; (global-set-key (kbd "C-=") 'spacemacs/scale-up-font)
-  ;; (global-set-key (kbd "C--") 'spacemacs/scale-down-font)
-
-  ;; (setq completing-read-function 'ivy-completing-read)
-
-  ;; Ivy isn't great for renaming files, so let's try using the default function
-  ;; (defun aj/use-completing-read-default (orig-fun &rest args)
-  ;;   (let ((completing-read-function 'completing-read-default))
-  ;;     (apply orig-fun args)))
-  ;; (advice-add 'spacemacs/rename-current-buffer-file :around 'aj/use-completing-read-default)
-
-  ;; Remove binding to open font panel
-  ;; (global-unset-key (kbd "s-t"))
-
-  ;; Pairing stuff
-  ;; (global-set-key (kbd "<end>") 'evil-end-of-line)
 
   ;; load private settings
   (when (file-exists-p "~/.emacs-private.el")
@@ -936,9 +788,7 @@ you should place your code here."
 
   (require 'rust-mode)
   (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
-  (setq company-tooltip-align-annotations t)
-
-  )
+  (setq company-tooltip-align-annotations t))
 
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -972,11 +822,11 @@ This function is called at the very end of Spacemacs initialization."
    (quote
     ("#00FF99" "#CCFF99" "#FFCC99" "#FF9999" "#FF99CC" "#CC99FF" "#9999FF" "#99CCFF" "#99FFCC" "#7FFF00")))
  '(hl-paren-colors (quote ("#326B6B")))
- '(js-indent-level 2 t)
+ '(js-indent-level 2)
  '(org-src-block-faces (quote (("emacs-lisp" (:background "#F0FFF0")))))
  '(package-selected-packages
    (quote
-    (lsp-ui lsp-treemacs lsp-python-ms helm-lsp dap-mode bui tree-mode cquery company-lsp ccls lsp-haskell intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell dante lcr company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode tide typescript-mode import-js grizzl lsp-go helm-gtags godoctor go-tag go-rename go-impl go-guru go-gen-test go-fill-struct go-eldoc ggtags flycheck-gometalinter flycheck-golangci-lint counsel-gtags company-go go-mode flow-js2-mode yasnippet-snippets helm-company helm-c-yasnippet fuzzy company-web web-completion-data company-statistics company-flow company-emoji company-anaconda auto-yasnippet ac-ispell auto-complete yapfify yaml-mode xclip ws-butler writeroom-mode winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen utop use-package tuareg treemacs-projectile treemacs-evil toc-org tagedit symon symbol-overlay string-inflection spaceline-all-the-icons smeargle slim-mode shift-number seti-theme scss-mode sass-mode rjsx-mode reveal-in-osx-finder restart-emacs reason-mode rainbow-mode rainbow-identifiers rainbow-delimiters pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer osx-trash osx-dictionary osx-clipboard org-gcal org-bullets open-junk-file ocp-indent ob-elixir nginx-mode naquadah-theme nameless move-text monokai-theme magit-svn magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint launchctl json-navigator js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helpful helm-xref helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-ag gruvbox-theme graphviz-dot-mode google-translate golden-ratio gitignore-templates github-search github-clone gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gist forge font-lock+ flycheck-pos-tip flycheck-package flycheck-ocaml flycheck-mix flycheck-flow flycheck-credo flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-terminal-cursor-changer evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu eval-sexp-fu erlang emojify emoji-cheat-sheet-plus emmet-mode elisp-slime-nav editorconfig dune dumb-jump dtrt-indent dotenv-mode doom-themes doom-modeline dockerfile-mode docker dired-collapse diminish diff-hl dakrone-theme cython-mode csv-mode counsel-projectile company-flx column-enforce-mode color-identifiers-mode clean-aindent-mode centered-cursor-mode browse-at-remote blacken auto-highlight-symbol auto-compile atom-one-dark-theme anaconda-mode alchemist aggressive-indent add-node-modules-path ace-link ace-jump-helm-line)))
+    (protobuf-mode sqlup-mode sql-indent all-the-icons-ivy lsp-ui lsp-treemacs lsp-python-ms helm-lsp dap-mode bui tree-mode cquery company-lsp ccls lsp-haskell intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell dante lcr company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode tide typescript-mode import-js grizzl lsp-go helm-gtags godoctor go-tag go-rename go-impl go-guru go-gen-test go-fill-struct go-eldoc ggtags flycheck-gometalinter flycheck-golangci-lint counsel-gtags company-go go-mode flow-js2-mode yasnippet-snippets helm-company helm-c-yasnippet fuzzy company-web web-completion-data company-statistics company-flow company-emoji company-anaconda auto-yasnippet ac-ispell auto-complete yapfify yaml-mode xclip ws-butler writeroom-mode winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen utop use-package tuareg treemacs-projectile treemacs-evil toc-org tagedit symon symbol-overlay string-inflection spaceline-all-the-icons smeargle slim-mode shift-number seti-theme scss-mode sass-mode rjsx-mode reveal-in-osx-finder restart-emacs reason-mode rainbow-mode rainbow-identifiers rainbow-delimiters pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer osx-trash osx-dictionary osx-clipboard org-gcal org-bullets open-junk-file ocp-indent ob-elixir nginx-mode naquadah-theme nameless move-text monokai-theme magit-svn magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint launchctl json-navigator js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helpful helm-xref helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-ag gruvbox-theme graphviz-dot-mode google-translate golden-ratio gitignore-templates github-search github-clone gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gist forge font-lock+ flycheck-pos-tip flycheck-package flycheck-ocaml flycheck-mix flycheck-flow flycheck-credo flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-terminal-cursor-changer evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu eval-sexp-fu erlang emojify emoji-cheat-sheet-plus emmet-mode elisp-slime-nav editorconfig dune dumb-jump dtrt-indent dotenv-mode doom-themes doom-modeline dockerfile-mode docker dired-collapse diminish diff-hl dakrone-theme cython-mode csv-mode counsel-projectile company-flx column-enforce-mode color-identifiers-mode clean-aindent-mode centered-cursor-mode browse-at-remote blacken auto-highlight-symbol auto-compile atom-one-dark-theme anaconda-mode alchemist aggressive-indent add-node-modules-path ace-link ace-jump-helm-line)))
  '(tetris-x-colors
    [[229 192 123]
     [97 175 239]
