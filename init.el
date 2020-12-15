@@ -34,14 +34,20 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(sql
+   '(
      (lsp :variables
           lsp-navigation 'simple
           lsp-ui-doc-enable nil
           lsp-clients-go-gocode-completion-enabled nil
           lsp-clients-go-server 'gopls)
+     (sql :variables
+          sql-backend 'lsp
+          sql-capitalize-keywords t
+          sql-auto-indent t
+          sql-lsp-sqls-workspace-config-path 'workspace)
      haskell
      kotlin
+     (java :variables java-backend 'lsp)
      typescript
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
@@ -57,8 +63,10 @@ This function should only modify configuration layer settings."
      emacs-lisp
      racket
      fsharp
+     csharp
      (go :variables
          go-format-before-save t
+         ;; go-backend 'lsp
          godoc-at-point-function 'godoc-gogetdoc)
      (c-c++ :variables
             c-c++-enable-clang-support t)
@@ -99,7 +107,7 @@ This function should only modify configuration layer settings."
      (elixir :variables elixir-backend 'alchemist)
      erlang
      semantic
-     react
+     (react :variable react-backend 'lsp)
      (vue :variables vue-backend 'lsp)
      (node :variable node-add-modules-path)
      prettier)
@@ -110,19 +118,19 @@ This function should only modify configuration layer settings."
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages
    '(
-     (reason-mode
-      :location (recipe
-                 :repo "reasonml-editor/reason-mode"
-                 :fetcher github
-                 :files ("reason-mode.el" "refmt.el" "reason-indent.el" "reason-interaction.el")))
-     utop
+     ;; (reason-mode
+     ;;  :location (recipe
+     ;;             :repo "reasonml-editor/reason-mode"
+     ;;             :fetcher github
+     ;;             :files ("reason-mode.el" "refmt.el" "reason-indent.el" "reason-interaction.el")))
+     ;; utop
      ;; evil-terminal-cursor-changer
      company-flx
-     dired-collapse
+     ;; dired-collapse
      ;; helpful
      ;; org-gcal
      ;; xclip
-     company-flow
+     ;; company-flow
      key-chord
      )
 
@@ -251,7 +259,8 @@ It should only modify the values of Spacemacs settings."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(planet
+   dotspacemacs-themes '(gotham
+                         planet
                          rebecca
                          brin
                          subatomic
@@ -261,7 +270,6 @@ It should only modify the values of Spacemacs settings."
                          junio
                          lush
                          kaolin-mono-dark
-                         gotham
                          doom-dracula)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
@@ -520,6 +528,12 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; Fix powerline separator colors on mac
   (setq powerline-image-apple-rgb t)
 
+  ;; SQL Config
+  ;;
+
+  ;; C# Omni server install location
+  (setq omnisharp-server-executable-path "/usr/local/bin/omnisharp")
+
   ;; Hide title bar
   ;; (setq initial-frame-alist '((undecorated . t)))
 
@@ -563,6 +577,9 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; (setq message-send-mail-function 'smtpmail-send-it)
   (setq message-kill-buffer-on-exit t)
 
+  ;; csharp flycheck 
+  (add-hook 'csharp-mode-hook #'flycheck-mode)
+
   (add-hook 'before-make-frame-hook
             (lambda ()
               (unless window-system
@@ -588,8 +605,8 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
-  (require 'all-the-icons)
-  (insert (all-the-icons-icon-for-file "main.go"))
+  ;; (require 'all-the-icons)
+  ;; (insert (all-the-icons-icon-for-file "main.go"))
   (require 'racket-mode)
   (define-key evil-normal-state-map (kbd "SPC o") 'flycheck-mode)
   ;; Racket Support
@@ -661,11 +678,14 @@ you should place your code here."
   ;; Set this to the mode you use, I use rjsx-mode
   (add-hook 'rjsx-mode-hook #'flow/set-flow-executable t)
 
-
-
-  (setq-default js2-mode-show-parse-errors nil)
-  (setq-default js2-mode-show-strict-warnings nil)
-
+  (setq-default
+   js2-basic-offset 2
+   web-mode-markup-indent-offset 2
+   web-mode-css-indent-offset 2
+   web-mode-code-indent-offset 2
+   web-mode-attr-indent-offset 2
+   js2-mode-show-strict-warnings nil
+   js2-mode-show-parse-errors nil)
 
   (defun save-all ()
   (interactive)
@@ -809,24 +829,23 @@ This function is called at the very end of Spacemacs initialization."
    (vector "#003f8e" "#ff9da4" "#d1f1a9" "#ffeead" "#bbdaff" "#ebbbff" "#99ffff" "#ffffff"))
  '(beacon-color "#ff9da4")
  '(custom-safe-themes
-   (quote
-    ("26d49386a2036df7ccbe802a06a759031e4455f07bda559dcf221f53e8850e69" default)))
+   '("26d49386a2036df7ccbe802a06a759031e4455f07bda559dcf221f53e8850e69" default))
  '(evil-want-Y-yank-to-eol nil)
  '(fci-rule-color "#003f8e")
- '(flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id))
- '(frame-background-mode (quote dark))
+ '(flycheck-color-mode-line-face-to-color 'mode-line-buffer-id)
+ '(frame-background-mode 'dark)
+ '(highlight-parentheses-background-colors
+   '("#00FF99" "#CCFF99" "#FFCC99" "#FF9999" "#FF99CC" "#CC99FF" "#9999FF" "#99CCFF" "#99FFCC" "#7FFF00"))
+ '(highlight-parentheses-colors '("#326B6B"))
  '(highlight-symbol-colors
-   (quote
-    ("#EFFF00" "#73CD4F" "#83DDFF" "MediumPurple1" "#66CDAA" "DarkOrange" "HotPink1" "#809FFF" "#ADFF2F")))
+   '("#EFFF00" "#73CD4F" "#83DDFF" "MediumPurple1" "#66CDAA" "DarkOrange" "HotPink1" "#809FFF" "#ADFF2F"))
  '(hl-paren-background-colors
-   (quote
-    ("#00FF99" "#CCFF99" "#FFCC99" "#FF9999" "#FF99CC" "#CC99FF" "#9999FF" "#99CCFF" "#99FFCC" "#7FFF00")))
- '(hl-paren-colors (quote ("#326B6B")))
- '(js-indent-level 2)
- '(org-src-block-faces (quote (("emacs-lisp" (:background "#F0FFF0")))))
+   '("#00FF99" "#CCFF99" "#FFCC99" "#FF9999" "#FF99CC" "#CC99FF" "#9999FF" "#99CCFF" "#99FFCC" "#7FFF00"))
+ '(hl-paren-colors '("#326B6B"))
+ '(js-indent-level 2 t)
+ '(org-src-block-faces '(("emacs-lisp" (:background "#F0FFF0"))))
  '(package-selected-packages
-   (quote
-    (protobuf-mode sqlup-mode sql-indent all-the-icons-ivy lsp-ui lsp-treemacs lsp-python-ms helm-lsp dap-mode bui tree-mode cquery company-lsp ccls lsp-haskell intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell dante lcr company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode tide typescript-mode import-js grizzl lsp-go helm-gtags godoctor go-tag go-rename go-impl go-guru go-gen-test go-fill-struct go-eldoc ggtags flycheck-gometalinter flycheck-golangci-lint counsel-gtags company-go go-mode flow-js2-mode yasnippet-snippets helm-company helm-c-yasnippet fuzzy company-web web-completion-data company-statistics company-flow company-emoji company-anaconda auto-yasnippet ac-ispell auto-complete yapfify yaml-mode xclip ws-butler writeroom-mode winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen utop use-package tuareg treemacs-projectile treemacs-evil toc-org tagedit symon symbol-overlay string-inflection spaceline-all-the-icons smeargle slim-mode shift-number seti-theme scss-mode sass-mode rjsx-mode reveal-in-osx-finder restart-emacs reason-mode rainbow-mode rainbow-identifiers rainbow-delimiters pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer osx-trash osx-dictionary osx-clipboard org-gcal org-bullets open-junk-file ocp-indent ob-elixir nginx-mode naquadah-theme nameless move-text monokai-theme magit-svn magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint launchctl json-navigator js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helpful helm-xref helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-ag gruvbox-theme graphviz-dot-mode google-translate golden-ratio gitignore-templates github-search github-clone gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gist forge font-lock+ flycheck-pos-tip flycheck-package flycheck-ocaml flycheck-mix flycheck-flow flycheck-credo flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-terminal-cursor-changer evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu eval-sexp-fu erlang emojify emoji-cheat-sheet-plus emmet-mode elisp-slime-nav editorconfig dune dumb-jump dtrt-indent dotenv-mode doom-themes doom-modeline dockerfile-mode docker dired-collapse diminish diff-hl dakrone-theme cython-mode csv-mode counsel-projectile company-flx column-enforce-mode color-identifiers-mode clean-aindent-mode centered-cursor-mode browse-at-remote blacken auto-highlight-symbol auto-compile atom-one-dark-theme anaconda-mode alchemist aggressive-indent add-node-modules-path ace-link ace-jump-helm-line)))
+   '(lsp-javacomp protobuf-mode sqlup-mode sql-indent all-the-icons-ivy lsp-ui lsp-treemacs lsp-python-ms helm-lsp dap-mode bui tree-mode cquery company-lsp ccls lsp-haskell intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell dante lcr company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode tide typescript-mode import-js grizzl lsp-go helm-gtags godoctor go-tag go-rename go-impl go-guru go-gen-test go-fill-struct go-eldoc ggtags flycheck-gometalinter flycheck-golangci-lint counsel-gtags company-go go-mode flow-js2-mode yasnippet-snippets helm-company helm-c-yasnippet fuzzy company-web web-completion-data company-statistics company-flow company-emoji company-anaconda auto-yasnippet ac-ispell auto-complete yapfify yaml-mode xclip ws-butler writeroom-mode winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen utop use-package tuareg treemacs-projectile treemacs-evil toc-org tagedit symon symbol-overlay string-inflection spaceline-all-the-icons smeargle slim-mode shift-number seti-theme scss-mode sass-mode rjsx-mode reveal-in-osx-finder restart-emacs reason-mode rainbow-mode rainbow-identifiers rainbow-delimiters pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer osx-trash osx-dictionary osx-clipboard org-gcal org-bullets open-junk-file ocp-indent ob-elixir nginx-mode naquadah-theme nameless move-text monokai-theme magit-svn magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint launchctl json-navigator js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helpful helm-xref helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-mode-manager helm-make helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-ag gruvbox-theme graphviz-dot-mode google-translate golden-ratio gitignore-templates github-search github-clone gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gist forge font-lock+ flycheck-pos-tip flycheck-package flycheck-ocaml flycheck-mix flycheck-flow flycheck-credo flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-terminal-cursor-changer evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu eval-sexp-fu erlang emojify emoji-cheat-sheet-plus emmet-mode elisp-slime-nav editorconfig dune dumb-jump dtrt-indent dotenv-mode doom-themes doom-modeline dockerfile-mode docker dired-collapse diminish diff-hl dakrone-theme cython-mode csv-mode counsel-projectile company-flx column-enforce-mode color-identifiers-mode clean-aindent-mode centered-cursor-mode browse-at-remote blacken auto-highlight-symbol auto-compile atom-one-dark-theme anaconda-mode alchemist aggressive-indent add-node-modules-path ace-link ace-jump-helm-line))
  '(tetris-x-colors
    [[229 192 123]
     [97 175 239]
@@ -837,8 +856,7 @@ This function is called at the very end of Spacemacs initialization."
     [86 182 194]])
  '(vc-annotate-background nil)
  '(vc-annotate-color-map
-   (quote
-    ((20 . "#ff9da4")
+   '((20 . "#ff9da4")
      (40 . "#ffc58f")
      (60 . "#ffeead")
      (80 . "#d1f1a9")
@@ -855,7 +873,7 @@ This function is called at the very end of Spacemacs initialization."
      (300 . "#ff9da4")
      (320 . "#ffc58f")
      (340 . "#ffeead")
-     (360 . "#d1f1a9"))))
+     (360 . "#d1f1a9")))
  '(vc-annotate-very-old-color nil)
  '(window-divider-mode nil))
 (custom-set-faces
